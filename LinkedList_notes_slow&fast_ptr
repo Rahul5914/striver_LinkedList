@@ -1,0 +1,283 @@
+🧭 LINKED LIST POINTER PATTERNS MASTER SHEET
+
+(Two-Pointer + Reverse Techniques — Striver Style)
+
+🚀 CORE CONCEPT
+
+Linked list problems almost always rely on pointer movement — either
+🌀 two pointers moving at different speeds (fast–slow pattern) or
+🔁 multiple pointers rearranging connections (prev–curr–next pattern).
+
+🔹 TYPES OF POINTER PATTERNS
+Type	Example Use	Key Idea
+🐢 Fast–Slow (Tortoise–Hare)	Find middle, detect cycle	Move one pointer 1 step, the other 2 steps
+🪄 Ahead–Behind	Nth node from end	Keep distance between pointers
+🔁 Prev–Curr–Next	Reverse links	Change direction of next pointers
+⚖️ Length Equalization	Intersection of two lists	Sync traversal lengths
+🧩 PART 1 — FAST & SLOW POINTER PATTERNS
+1️⃣ Middle of Linked List
+ListNode* middleNode(ListNode* head) {
+    ListNode* slow = head;
+    ListNode* fast = head;
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    return slow; // middle node
+}
+
+2️⃣ Detect Cycle (Floyd’s Algorithm)
+bool hasCycle(ListNode* head) {
+    ListNode *slow = head, *fast = head;
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+        if (slow == fast) return true;
+    }
+    return false;
+}
+
+3️⃣ Start Node of Cycle
+ListNode* detectCycle(ListNode* head) {
+    ListNode *slow = head, *fast = head;
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+        if (slow == fast) {
+            fast = head;
+            while (slow != fast) {
+                slow = slow->next;
+                fast = fast->next;
+            }
+            return slow; // start of loop
+        }
+    }
+    return nullptr;
+}
+
+4️⃣ Length of Cycle
+int cycleLength(ListNode* head) {
+    ListNode *slow = head, *fast = head;
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+        if (slow == fast) {
+            int length = 1;
+            fast = fast->next;
+            while (fast != slow) {
+                fast = fast->next;
+                length++;
+            }
+            return length;
+        }
+    }
+    return 0;
+}
+
+5️⃣ Remove Nth Node from End
+ListNode* removeNthFromEnd(ListNode* head, int n) {
+    ListNode dummy(0);
+    dummy.next = head;
+    ListNode *fast = &dummy, *slow = &dummy;
+    for (int i = 0; i <= n; i++) fast = fast->next;
+    while (fast) {
+        fast = fast->next;
+        slow = slow->next;
+    }
+    slow->next = slow->next->next;
+    return dummy.next;
+}
+
+6️⃣ Intersection of Two Linked Lists
+ListNode* getIntersectionNode(ListNode* A, ListNode* B) {
+    if (!A || !B) return nullptr;
+    ListNode *p1 = A, *p2 = B;
+    while (p1 != p2) {
+        p1 = p1 ? p1->next : B;
+        p2 = p2 ? p2->next : A;
+    }
+    return p1;
+}
+
+7️⃣ Check Palindrome Linked List
+bool isPalindrome(ListNode* head) {
+    if (!head || !head->next) return true;
+
+    // Step 1: find middle
+    ListNode* slow = head;
+    ListNode* fast = head;
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+
+    // Step 2: reverse second half
+    ListNode* prev = nullptr;
+    while (slow) {
+        ListNode* next = slow->next;
+        slow->next = prev;
+        prev = slow;
+        slow = next;
+    }
+
+    // Step 3: compare halves
+    ListNode* left = head;
+    ListNode* right = prev;
+    while (right) {
+        if (left->val != right->val) return false;
+        left = left->next;
+        right = right->next;
+    }
+    return true;
+}
+
+8️⃣ Reorder List (L1→Ln→L2→Ln-1)
+void reorderList(ListNode* head) {
+    if (!head || !head->next) return;
+
+    // Step 1: find middle
+    ListNode* slow = head;
+    ListNode* fast = head;
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+
+    // Step 2: reverse second half
+    ListNode* prev = nullptr;
+    while (slow) {
+        ListNode* next = slow->next;
+        slow->next = prev;
+        prev = slow;
+        slow = next;
+    }
+
+    // Step 3: merge both halves
+    ListNode* first = head;
+    ListNode* second = prev;
+    while (second->next) {
+        ListNode* tmp1 = first->next;
+        ListNode* tmp2 = second->next;
+        first->next = second;
+        second->next = tmp1;
+        first = tmp1;
+        second = tmp2;
+    }
+}
+
+9️⃣ Merge Two Sorted Lists
+ListNode* mergeTwoLists(ListNode* l1, ListNode* l2) {
+    ListNode dummy(0);
+    ListNode* tail = &dummy;
+    while (l1 && l2) {
+        if (l1->val < l2->val) {
+            tail->next = l1;
+            l1 = l1->next;
+        } else {
+            tail->next = l2;
+            l2 = l2->next;
+        }
+        tail = tail->next;
+    }
+    tail->next = l1 ? l1 : l2;
+    return dummy.next;
+}
+
+🔹 PART 2 — REVERSE POINTER PATTERNS (Prev–Curr–Next)
+🧠 Core Idea
+
+Instead of moving at different speeds, we manipulate next pointers to reverse or rearrange nodes.
+
+1️⃣ Reverse Entire Linked List (Iterative)
+ListNode* reverseList(ListNode* head) {
+    ListNode* prev = nullptr;
+    ListNode* curr = head;
+    ListNode* next = nullptr;
+
+    while (curr) {
+        next = curr->next;   // store next
+        curr->next = prev;   // reverse pointer
+        prev = curr;         // move prev forward
+        curr = next;         // move curr forward
+    }
+    return prev; // new head
+}
+
+2️⃣ Reverse Linked List (Recursive)
+ListNode* reverseList(ListNode* head) {
+    if (!head || !head->next) return head;
+    ListNode* newHead = reverseList(head->next);
+    head->next->next = head;
+    head->next = nullptr;
+    return newHead;
+}
+
+3️⃣ Reverse Between Positions (m, n)
+ListNode* reverseBetween(ListNode* head, int left, int right) {
+    if (!head) return nullptr;
+    ListNode dummy(0);
+    dummy.next = head;
+    ListNode* prev = &dummy;
+
+    // Move prev to the node before reversal
+    for (int i = 1; i < left; i++)
+        prev = prev->next;
+
+    ListNode* curr = prev->next;
+    for (int i = 0; i < right - left; i++) {
+        ListNode* temp = curr->next;
+        curr->next = temp->next;
+        temp->next = prev->next;
+        prev->next = temp;
+    }
+    return dummy.next;
+}
+
+4️⃣ Reverse Nodes in k-Group
+ListNode* reverseKGroup(ListNode* head, int k) {
+    ListNode* curr = head;
+    int count = 0;
+    while (curr && count < k) {
+        curr = curr->next;
+        count++;
+    }
+    if (count < k) return head;
+
+    // reverse first k nodes
+    curr = head;
+    ListNode* prev = nullptr;
+    ListNode* next = nullptr;
+    for (int i = 0; i < k; i++) {
+        next = curr->next;
+        curr->next = prev;
+        prev = curr;
+        curr = next;
+    }
+
+    // recursively reverse remaining
+    if (next)
+        head->next = reverseKGroup(next, k);
+
+    return prev;
+}
+
+🧠 Pattern Recognition Summary
+Category	Pointer Relationship	Core Use
+Fast–Slow	Move at different speeds	Find middle, detect loops
+Ahead–Behind	Maintain distance	Nth from end
+Prev–Curr–Next	Reverse links	Reverse entire / partial list
+Equalization	Sync traversal lengths	Intersection detection
+🧩 Tricky Interview Tip
+
+Fast–Slow → when you measure “distance” or “timing” in traversal
+Prev–Curr–Next → when you modify “direction” of links
+
+🧠 Bonus — Common Combined Use
+Problem	Combo Used
+Palindrome Linked List	Find middle (Fast–Slow) + Reverse second half (Prev–Curr–Next)
+Reorder List	Find middle (Fast–Slow) + Reverse half + Merge (Two pointers)
+Rotate List	Use two pointers to find new tail + reconnect pointers
+💡 Quick Mnemonic
+
+🐢 Fast–Slow → Position related (who meets where)
+🔁 Prev–Curr–Next → Structure related (who points where)
